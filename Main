@@ -1,0 +1,117 @@
+package com.gmail.minecraftsnow1337;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class Main
+  extends JavaPlugin
+{
+  static List<Player> ukryci = new ArrayList<Player>();
+  static boolean wlaczono = true;
+  static boolean automat = false;
+  static List<String> blckcmds = new ArrayList<String>();
+  
+  public void onEnable()
+  {
+    Bukkit.getServer().getPluginManager().registerEvents(new PlayerMove(), this);
+    Bukkit.getServer().getPluginManager().registerEvents(new PlayerInteract(), this);
+    Bukkit.getServer().getPluginManager().registerEvents(new PlayerCommandPreprocess(), this);
+    if ((!getConfig().contains("disabled-commands")) || (!getConfig().isList("disabled-commands")))
+    {
+      List<String> lista = new ArrayList<String>();
+      lista.add("/plugins");
+      lista.add("/pl");
+      lista.add("/?");
+      lista.add("/ver");
+      lista.add("/version");
+      lista.add("/spigot");
+      lista.add("/bukkit");
+      lista.add("/reload");
+      getConfig().set("disabled-commands", lista);
+      saveConfig();
+      blckcmds = getConfig().getStringList("disabled-commands");
+    }
+    else
+    {
+      blckcmds = getConfig().getStringList("disabled-commands");
+    }
+  }
+  
+  public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
+  {
+    if (!(sender instanceof Player)) {
+      return false;
+    }
+    Player player = (Player)sender;
+    if (command.getName().equalsIgnoreCase("antycheat"))
+    {
+      if (!player.hasPermission("snow.antycheat")) {
+        return true;
+      }
+      if (player.hasPermission("snow.antycheat.admin")) {
+        if (args.length == 2)
+        {
+          if (args[0].equalsIgnoreCase("automat"))
+          {
+            if (args[1].equalsIgnoreCase("wylacz"))
+            {
+              automat = false;
+              player.sendMessage("§8[§4AntyCheat§8] §7Funkcja §8» §6Automat zostala dezaktywowana");
+              return true;
+            }
+            if (args[1].equalsIgnoreCase("wlacz"))
+            {
+              automat = true;
+              player.sendMessage("§8[§4AntyCheat§8] §7Funkcja §8» §6Automat zostala aktywowana");
+              return true;
+            }
+            player.sendMessage("§8[§4AntyCheat§8] §6Poprawnie §8» §7/antycheat automat wlacz/wylacz");
+          }
+        }
+        else if (args.length == 1)
+        {
+          if (args[0].equalsIgnoreCase("wylacz"))
+          {
+            player.sendMessage("§8[§4AntyCheat§8] §7Funkcja §8» §6Automat zostala dezaktywowana");
+            wlaczono = false;
+            return true;
+          }
+          if (args[0].equalsIgnoreCase("wlacz"))
+          {
+            player.sendMessage("§8[§4AntyCheat§8] §7Funkcja §8» §6Automat zostala aktywowana");
+            wlaczono = true;
+            return true;
+          }
+        }
+      }
+      if (args.length == 1)
+      {
+        if (args[0].equalsIgnoreCase("ukryj"))
+        {
+          ukryci.add(player);
+          player.sendMessage("§8[§4AntyCheat§8] §7Funkcja §8» §6Ukryci zostala aktywowana");
+          return true;
+        }
+        if (args[0].equalsIgnoreCase("pokaz"))
+        {
+          if (ukryci.contains(player)) {
+            ukryci.remove(player);
+          }
+          player.sendMessage("§8[§4AntyCheat§8] §7Funkcja §8» §6Ukryci zostala dezaktywowana");
+          return true;
+        }
+      }
+      else
+      {
+        player.sendMessage("§8[§4AntyCheat§8] §6Poprawnie §8» §7/antycheat");
+      }
+    }
+    return true;
+  }
+}
